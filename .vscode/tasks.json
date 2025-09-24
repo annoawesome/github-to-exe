@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "watch",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: watch",
+      "detail": "vite build --watch",
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: build",
+      "detail": "vite build",
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "preview",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: preview",
+      "detail": "vite preview",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

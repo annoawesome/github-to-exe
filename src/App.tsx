@@ -1,5 +1,13 @@
-import React, { useEffect } from "react";
-import { getRepoHomepage } from "./github-octo.js";
+import React, { useState } from "react";
+import { getRepoHomepage, isValidGitHubRepoUrl } from "./github-octo.js";
+import {
+  appendMessage,
+  CHAT_STATE_NAMES,
+  CHAT_STATES,
+  newChatLog,
+  SENDERS,
+  sendMessage,
+} from "./chat.js";
 
 type ChatMessageContext = {
   from_user: boolean;
@@ -13,8 +21,12 @@ type ChatMessage = {
   context: ChatMessageContext;
 };
 
-type UserInputArgs = { placeholder: string; selectableOptions: string[] };
-function UserInput({ placeholder, selectableOptions }: UserInputArgs) {
+type UserInputArgs = {
+  placeholder: string;
+  selectableOptions: string[];
+  onInput: (userInput: string) => void;
+};
+function UserInput({ placeholder, selectableOptions, onInput }: UserInputArgs) {
   if (selectableOptions.length === 0) {
     return (
       <input
@@ -22,6 +34,11 @@ function UserInput({ placeholder, selectableOptions }: UserInputArgs) {
         name="input-custom-text"
         id="input-custom-text"
         placeholder={placeholder}
+        onKeyDown={(input) => {
+          if (input.key === "Enter") {
+            onInput(input.currentTarget.value);
+          }
+        }}
       />
     );
   } else {
@@ -37,48 +54,7 @@ function UserInput({ placeholder, selectableOptions }: UserInputArgs) {
   }
 }
 
-function ChatLogs() {
-  const chatLogs: ChatMessage[] = [
-    {
-      sender: "User",
-      response: "|github url|",
-      context: {
-        from_user: true,
-      },
-    },
-    {
-      sender: "GitHub to Exe",
-      action: "Searching for .exe file",
-      response:
-        "Hmm, there doesn't seem to be a releases page. Let's try checking if there is a website.",
-      context: { from_user: false },
-    },
-    {
-      sender: "User",
-      response: "Can you find a website instead?",
-      context: {
-        from_user: true,
-      },
-    },
-    {
-      sender: "GitHub to Exe",
-      action: "Searching for website...",
-      response:
-        "I found a website within the description that possibly has a download link. |website url|",
-      context: { from_user: false },
-    },
-  ];
-
-  useEffect(() => {
-    console.log("Should run twice!");
-    // I use arch btw 🤓
-    getRepoHomepage("https://github.com/basecamp/omarchy").then((homepage) => {
-      if (homepage) {
-        console.log(homepage);
-      }
-    });
-  }, []);
-
+function ChatLogs({ chatLogs }: { chatLogs: ChatMessage[] }) {
   const chatMessages = chatLogs.map((msg, index) => {
     const floatToRight = msg.context.from_user ? "flex-right" : "";
 
@@ -104,16 +80,38 @@ function ChatLogs() {
 }
 
 function ChatWindow() {
-  const placeholder = "GitHub Link or URL";
-  const selectableOptions = [
-    "My CPU architecture is amd64",
-    "My CPU architecture is arm",
-  ];
+  const [chatLogs, setChatLogs] = useState(newChatLog());
+  const [chatState, setChatState] = useState(
+    CHAT_STATES[CHAT_STATE_NAMES.ASK_FOR_URL],
+  );
 
   return (
     <div id="chat-window">
-      <ChatLogs />
-      <UserInput placeholder={placeholder} selectableOptions={[]} />
+      <ChatLogs chatLogs={chatLogs} />
+      <UserInput
+        placeholder={chatState.placeholder}
+        selectableOptions={chatState.options}
+        onInput={(url) => {
+          if (!isValidGitHubRepoUrl(url)) {
+            return;
+          }
+
+          getRepoHomepage(url).then((homepage) => {
+            if (homepage) {
+              setChatLogs(
+                appendMessage(
+                  chatLogs,
+                  sendMessage(
+                    SENDERS.APP,
+                    `I found a website within the description that possibly has a download: ${homepage}`,
+                  ),
+                ),
+              );
+              setChatState(CHAT_STATES[CHAT_STATE_NAMES.RESTART]);
+            }
+          });
+        }}
+      />
     </div>
   );
 }

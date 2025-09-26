@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { getRepoHomepage } from "./github-octo.js";
 
 type ChatMessageContext = {
   from_user: boolean;
@@ -68,6 +69,16 @@ function ChatLogs() {
     },
   ];
 
+  useEffect(() => {
+    console.log("Should run twice!");
+    // I use arch btw 🤓
+    getRepoHomepage("https://github.com/basecamp/omarchy").then((homepage) => {
+      if (homepage) {
+        console.log(homepage);
+      }
+    });
+  }, []);
+
   const chatMessages = chatLogs.map((msg, index) => {
     const floatToRight = msg.context.from_user ? "flex-right" : "";
 
@@ -102,10 +113,7 @@ function ChatWindow() {
   return (
     <div id="chat-window">
       <ChatLogs />
-      <UserInput
-        placeholder={placeholder}
-        selectableOptions={selectableOptions}
-      />
+      <UserInput placeholder={placeholder} selectableOptions={[]} />
     </div>
   );
 }

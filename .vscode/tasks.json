@@ -36,6 +36,20 @@
       "runOptions": {
         "runOn": "folderOpen"
       }
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: dev",
+      "detail": "vite",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ]
 }

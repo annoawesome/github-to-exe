@@ -1,3 +1,6 @@
+import React from "react";
+import { getRepoHomepage, isValidGitHubRepoUrl } from "./github-octo.js";
+
 type ChatMessageContext = {
   from_user: boolean;
   action_id?: string | undefined;
@@ -15,6 +18,13 @@ type ChatState = {
   placeholder?: string;
 };
 
+type OnInputArgs = {
+  chatLogs: ChatMessage[];
+  chatStateName: string;
+  setChatLogs: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  setChatStateName: React.Dispatch<React.SetStateAction<string>>;
+};
+
 export const CHAT_STATE_NAMES = {
   ASK_FOR_URL: "AskForUrl",
   RESTART: "Restart",
@@ -28,6 +38,29 @@ export const CHAT_STATES: Record<string, ChatState> = {
   [CHAT_STATE_NAMES.RESTART]: {
     options: ["Restart App"],
     placeholder: "",
+  },
+};
+
+export const ON_INPUT = {
+  [CHAT_STATE_NAMES.ASK_FOR_URL]: (url: string, onInputObject: OnInputArgs) => {
+    if (!isValidGitHubRepoUrl(url)) {
+      return;
+    }
+
+    getRepoHomepage(url).then((homepage) => {
+      if (homepage) {
+        onInputObject.setChatLogs(
+          appendMessage(
+            onInputObject.chatLogs,
+            sendMessage(
+              SENDERS.APP,
+              `I found a website within the description that possibly has a download: ${homepage}`,
+            ),
+          ),
+        );
+        onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
+      }
+    });
   },
 };
 

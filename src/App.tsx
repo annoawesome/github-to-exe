@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import { getRepoHomepage, isValidGitHubRepoUrl } from "./github-octo.js";
-import {
-  appendMessage,
-  CHAT_STATE_NAMES,
-  CHAT_STATES,
-  newChatLog,
-  SENDERS,
-  sendMessage,
-} from "./chat.js";
+import { CHAT_STATE_NAMES, CHAT_STATES, newChatLog, ON_INPUT } from "./chat.js";
 
 type ChatMessageContext = {
   from_user: boolean;
@@ -81,9 +73,11 @@ function ChatLogs({ chatLogs }: { chatLogs: ChatMessage[] }) {
 
 function ChatWindow() {
   const [chatLogs, setChatLogs] = useState(newChatLog());
-  const [chatState, setChatState] = useState(
-    CHAT_STATES[CHAT_STATE_NAMES.ASK_FOR_URL],
+  const [chatStateName, setChatStateName] = useState(
+    CHAT_STATE_NAMES.ASK_FOR_URL,
   );
+
+  const chatState = CHAT_STATES[chatStateName];
 
   return (
     <div id="chat-window">
@@ -91,24 +85,12 @@ function ChatWindow() {
       <UserInput
         placeholder={chatState.placeholder}
         selectableOptions={chatState.options}
-        onInput={(url) => {
-          if (!isValidGitHubRepoUrl(url)) {
-            return;
-          }
-
-          getRepoHomepage(url).then((homepage) => {
-            if (homepage) {
-              setChatLogs(
-                appendMessage(
-                  chatLogs,
-                  sendMessage(
-                    SENDERS.APP,
-                    `I found a website within the description that possibly has a download: ${homepage}`,
-                  ),
-                ),
-              );
-              setChatState(CHAT_STATES[CHAT_STATE_NAMES.RESTART]);
-            }
+        onInput={(text) => {
+          ON_INPUT[chatStateName](text, {
+            chatLogs: chatLogs,
+            chatStateName: chatStateName,
+            setChatLogs: setChatLogs,
+            setChatStateName: setChatStateName,
           });
         }}
       />

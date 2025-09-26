@@ -12,6 +12,30 @@ type ChatMessage = {
   context: ChatMessageContext;
 };
 
+type UserInputArgs = { placeholder: string; selectableOptions: string[] };
+function UserInput({ placeholder, selectableOptions }: UserInputArgs) {
+  if (selectableOptions.length === 0) {
+    return (
+      <input
+        type="text"
+        name="input-custom-text"
+        id="input-custom-text"
+        placeholder={placeholder}
+      />
+    );
+  } else {
+    const optionList = selectableOptions.map((option, index) => {
+      return (
+        <button key={index} className="input-selectable-option">
+          {option}
+        </button>
+      );
+    });
+
+    return <div id="selectable-options">{optionList}</div>;
+  }
+}
+
 function ChatLogs() {
   const chatLogs: ChatMessage[] = [
     {
@@ -69,14 +93,18 @@ function ChatLogs() {
 }
 
 function ChatWindow() {
+  const placeholder = "GitHub Link or URL";
+  const selectableOptions = [
+    "My CPU architecture is amd64",
+    "My CPU architecture is arm",
+  ];
+
   return (
     <div id="chat-window">
       <ChatLogs />
-      <input
-        type="text"
-        name="input-github-url"
-        id="input-github-url"
-        placeholder="GitHub URL..."
+      <UserInput
+        placeholder={placeholder}
+        selectableOptions={selectableOptions}
       />
     </div>
   );

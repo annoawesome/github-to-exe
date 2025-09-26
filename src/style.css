@@ -21,7 +21,7 @@ body {
   overflow-y: auto;
 }
 
-#input-github-url {
+#input-custom-text {
   flex: 0 0;
   background-color: hsl(280, 25%, 20%);
   border: 1px solid hsl(310, 35%, 40%);
@@ -31,6 +31,24 @@ body {
   padding: 16px;
   margin: 32px;
   color: hsl(310, 35%, 40%);
+}
+
+#selectable-options {
+  display: flex;
+  gap: 32px;
+  padding: 32px;
+}
+
+.input-selectable-option {
+  background-color: hsl(280, 25%, 20%);
+  border: 1px solid hsl(310, 35%, 40%);
+  box-shadow: 0px 4px 8px hsl(260, 20%, 10%);
+  border-radius: 512px;
+
+  padding: 16px;
+  color: hsl(310, 35%, 40%);
+
+  width: fit-content;
 }
 
 .app-response {

@@ -54,13 +54,25 @@ export const ON_INPUT = {
 
     onInputObject.setChatStateName(CHAT_STATE_NAMES.WAITING);
 
+    onInputObject.setChatLogs(
+      appendMessage(
+        onInputObject.chatLogs,
+        sendMessage(
+          SENDERS.APP,
+          "I am looking the project up. Just give me a moment.",
+          "Looking for an associated website...",
+        ),
+      ),
+    );
+
     getRepoHomepage(url).then((homepage) => {
       if (!homepage) {
-        appendMessage(
+        amendMessage(
           onInputObject.chatLogs,
           sendMessage(
             SENDERS.APP,
             "Sorry, but there's no homepage associated with that GitHub link",
+            "Looking for an associated website...",
           ),
         );
 
@@ -69,11 +81,12 @@ export const ON_INPUT = {
       }
 
       onInputObject.setChatLogs(
-        appendMessage(
+        amendMessage(
           onInputObject.chatLogs,
           sendMessage(
             SENDERS.APP,
             `I found a website within the description that possibly has a download: ${homepage}`,
+            "Looking for an associated website...",
           ),
         ),
       );
@@ -115,4 +128,8 @@ export function sendMessage(
 
 export function appendMessage(chatLog: ChatMessage[], message: ChatMessage) {
   return [...chatLog, message];
+}
+
+export function amendMessage(chatLog: ChatMessage[], newMessage: ChatMessage) {
+  return [...chatLog.slice(0, -1), newMessage];
 }

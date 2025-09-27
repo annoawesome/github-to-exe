@@ -94,6 +94,11 @@ export const ON_INPUT = {
       onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
     });
   },
+  [CHAT_STATE_NAMES.RESTART]: (_, onInputObject: OnInputArgs) => {
+    console.log(_);
+    onInputObject.setChatLogs(newChatLog());
+    onInputObject.setChatStateName(CHAT_STATE_NAMES.ASK_FOR_URL);
+  },
 };
 
 export const SENDERS = {

@@ -44,7 +44,13 @@ function UserInput({ placeholder, selectableOptions, onInput }: UserInputArgs) {
   } else {
     const optionList = selectableOptions.map((option, index) => {
       return (
-        <button key={index} className="input-selectable-option">
+        <button
+          key={index}
+          className="input-selectable-option"
+          onClick={() => {
+            onInput(option);
+          }}
+        >
           {option}
         </button>
       );

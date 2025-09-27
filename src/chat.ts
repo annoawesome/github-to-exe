@@ -28,12 +28,17 @@ type OnInputArgs = {
 export const CHAT_STATE_NAMES = {
   ASK_FOR_URL: "AskForUrl",
   RESTART: "Restart",
+  WAITING: "Waiting",
 };
 
 export const CHAT_STATES: Record<string, ChatState> = {
   [CHAT_STATE_NAMES.ASK_FOR_URL]: {
     options: [],
     placeholder: "GitHub Link or URL",
+  },
+  [CHAT_STATE_NAMES.WAITING]: {
+    options: [],
+    placeholder: "",
   },
   [CHAT_STATE_NAMES.RESTART]: {
     options: ["Restart App"],
@@ -47,19 +52,33 @@ export const ON_INPUT = {
       return;
     }
 
+    onInputObject.setChatStateName(CHAT_STATE_NAMES.WAITING);
+
     getRepoHomepage(url).then((homepage) => {
-      if (homepage) {
-        onInputObject.setChatLogs(
-          appendMessage(
-            onInputObject.chatLogs,
-            sendMessage(
-              SENDERS.APP,
-              `I found a website within the description that possibly has a download: ${homepage}`,
-            ),
+      if (!homepage) {
+        appendMessage(
+          onInputObject.chatLogs,
+          sendMessage(
+            SENDERS.APP,
+            "Sorry, but there's no homepage associated with that GitHub link",
           ),
         );
+
         onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
+        return;
       }
+
+      onInputObject.setChatLogs(
+        appendMessage(
+          onInputObject.chatLogs,
+          sendMessage(
+            SENDERS.APP,
+            `I found a website within the description that possibly has a download: ${homepage}`,
+          ),
+        ),
+      );
+
+      onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
     });
   },
 };

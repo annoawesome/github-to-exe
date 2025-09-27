@@ -51,6 +51,14 @@ body {
   width: fit-content;
 }
 
+.secondary-text {
+  color: hsl(310, 35%, 40%);
+}
+
+#waiting-text {
+  margin: 32px;
+}
+
 .app-response {
   margin: 32px;
   display: flex;

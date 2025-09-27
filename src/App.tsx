@@ -20,19 +20,27 @@ type UserInputArgs = {
 };
 function UserInput({ placeholder, selectableOptions, onInput }: UserInputArgs) {
   if (selectableOptions.length === 0) {
-    return (
-      <input
-        type="text"
-        name="input-custom-text"
-        id="input-custom-text"
-        placeholder={placeholder}
-        onKeyDown={(input) => {
-          if (input.key === "Enter") {
-            onInput(input.currentTarget.value);
-          }
-        }}
-      />
-    );
+    if (placeholder.length > 0) {
+      return (
+        <input
+          type="text"
+          name="input-custom-text"
+          id="input-custom-text"
+          placeholder={placeholder}
+          onKeyDown={(input) => {
+            if (input.key === "Enter") {
+              onInput(input.currentTarget.value);
+            }
+          }}
+        />
+      );
+    } else {
+      return (
+        <p className="secondary-text" id="waiting-text">
+          Waiting for response...
+        </p>
+      );
+    }
   } else {
     const optionList = selectableOptions.map((option, index) => {
       return (

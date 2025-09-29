@@ -1,5 +1,9 @@
 import React from "react";
-import { getRepoHomepage, isValidGitHubRepoUrl } from "./github-octo.js";
+import {
+  getReleasesUrl,
+  getRepoHomepage,
+  isValidGitHubRepoUrl,
+} from "./github-octo.js";
 
 type ChatMessageContext = {
   from_user: boolean;
@@ -27,6 +31,8 @@ type OnInputArgs = {
 
 export const CHAT_STATE_NAMES = {
   ASK_FOR_URL: "AskForUrl",
+  WEBSITE_OBTAINED: "WebsiteObtained",
+  RELEASES_OBTAINED: "ReleasesObtained",
   RESTART: "Restart",
   WAITING: "Waiting",
 };
@@ -35,6 +41,14 @@ export const CHAT_STATES: Record<string, ChatState> = {
   [CHAT_STATE_NAMES.ASK_FOR_URL]: {
     options: [],
     placeholder: "GitHub Link or URL",
+  },
+  [CHAT_STATE_NAMES.WEBSITE_OBTAINED]: {
+    options: ["There's no download listed."],
+    placeholder: "",
+  },
+  [CHAT_STATE_NAMES.RELEASES_OBTAINED]: {
+    options: ["This is too confusing."],
+    placeholder: "",
   },
   [CHAT_STATE_NAMES.WAITING]: {
     options: [],
@@ -67,7 +81,7 @@ export const ON_INPUT = {
 
     getRepoHomepage(url).then((homepage) => {
       if (!homepage) {
-        amendMessage(
+        const newChatLogs = amendMessage(
           onInputObject.chatLogs,
           sendMessage(
             SENDERS.APP,
@@ -76,7 +90,47 @@ export const ON_INPUT = {
           ),
         );
 
-        onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
+        onInputObject.setChatLogs(
+          appendMessage(
+            newChatLogs,
+            sendMessage(
+              SENDERS.APP,
+              "Let me check the Releases page.",
+              "Looking for download page...",
+            ),
+          ),
+        );
+
+        getReleasesUrl(url).then((releasesUrl) => {
+          if (!releasesUrl) {
+            onInputObject.setChatLogs((prev) =>
+              amendMessage(
+                prev,
+                sendMessage(
+                  SENDERS.APP,
+                  "I couldn't find anything. Sorry.",
+                  "Looking for download page...",
+                ),
+              ),
+            );
+
+            onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
+            return;
+          }
+
+          onInputObject.setChatLogs((prev) =>
+            amendMessage(
+              prev,
+              sendMessage(
+                SENDERS.APP,
+                `I found a download page here: ${releasesUrl}`,
+                "Looking for download page...",
+              ),
+            ),
+          );
+
+          onInputObject.setChatStateName(CHAT_STATE_NAMES.RELEASES_OBTAINED);
+        });
         return;
       }
 
@@ -91,7 +145,7 @@ export const ON_INPUT = {
         ),
       );
 
-      onInputObject.setChatStateName(CHAT_STATE_NAMES.RESTART);
+      onInputObject.setChatStateName(CHAT_STATE_NAMES.WEBSITE_OBTAINED);
     });
   },
   [CHAT_STATE_NAMES.RESTART]: (_, onInputObject: OnInputArgs) => {

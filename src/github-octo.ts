@@ -35,3 +35,16 @@ export async function getRepoHomepage(githubUrl: string) {
     return res.data.homepage;
   }
 }
+
+export async function getReleasesUrl(githubUrl: string) {
+  const repoInfo = getGitHubUrlInfo(githubUrl);
+
+  const res = await octokit.rest.repos.getLatestRelease({
+    owner: repoInfo.owner,
+    repo: repoInfo.repo,
+  });
+
+  if (res.data) {
+    return res.data.html_url;
+  }
+}
